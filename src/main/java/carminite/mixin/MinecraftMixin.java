@@ -41,8 +41,7 @@ public class MinecraftMixin {
 		method = "renderFrame(Z)V",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/util/profiling/ProfilerFiller;pop()V",
-			shift = At.Shift.AFTER
+			target = "Lnet/minecraft/client/renderer/GameRenderer;extract(Lnet/minecraft/client/DeltaTracker;Z)V"
 		)
 	)
 	private void carminite$renderFramePre(
@@ -56,7 +55,7 @@ public class MinecraftMixin {
 		method = "renderFrame(Z)V",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/client/renderer/GameRenderer;render(Lnet/minecraft/client/DeltaTracker;Z)V",
+			target = "Lnet/minecraft/client/renderer/GameRenderer;render()V",
 			shift = At.Shift.AFTER
 		)
 	)

@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class BlockEntityRenderDispatcherMixin {
 
 	@Inject(
-		method = "tryExtractRenderState(Lnet/minecraft/world/level/block/entity/BlockEntity;FLnet/minecraft/client/renderer/feature/ModelFeatureRenderer$CrumblingOverlay;)Lnet/minecraft/client/renderer/blockentity/state/BlockEntityRenderState;",
+		method = "tryExtractRenderState(Lnet/minecraft/world/level/block/entity/BlockEntity;FLnet/minecraft/client/renderer/feature/ModelFeatureRenderer$CrumblingOverlay;Z)Lnet/minecraft/client/renderer/blockentity/state/BlockEntityRenderState;",
 		at = @At(
 			value = "INVOKE",
 			target = "Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;shouldRender(Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/world/phys/Vec3;)Z",
@@ -30,6 +30,7 @@ public class BlockEntityRenderDispatcherMixin {
 		BlockEntity blockEntity,
 		float partialTicks,
 		ModelFeatureRenderer.CrumblingOverlay breakProgress,
+		boolean isGloballyRendered,
 		CallbackInfoReturnable<BlockEntityRenderState> cir,
 		@Local(name = "renderer") BlockEntityRenderer<E, S> renderer
 	) {

@@ -1,6 +1,6 @@
 package carminite.mixin;
 
-import net.minecraft.advancements.criterion.SingleComponentItemPredicate;
+import net.minecraft.advancements.predicates.SingleComponentItemPredicate;
 import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.predicates.AttributeModifiersPredicate;
 import net.minecraft.world.item.component.ItemAttributeModifiers;

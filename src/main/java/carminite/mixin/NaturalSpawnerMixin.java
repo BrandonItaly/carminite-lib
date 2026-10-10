@@ -21,22 +21,16 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(NaturalSpawner.class)
 public class NaturalSpawnerMixin {
 
-    @WrapMethod(method = "mobsAt(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/StructureManager;Lnet/minecraft/world/level/chunk/ChunkGenerator;Lnet/minecraft/world/entity/MobCategory;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Holder;)Lnet/minecraft/util/random/WeightedList;")
+    @WrapMethod(method = "mobsAt(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/StructureManager;Lnet/minecraft/world/level/chunk/ChunkGenerator;Lnet/minecraft/world/entity/MobCategory;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/util/random/WeightedList;")
     private static WeightedList<MobSpawnSettings.SpawnerData> carminite$potentialSpawns(
         ServerLevel level,
         StructureManager structureManager,
         ChunkGenerator generator,
         MobCategory mobCategory,
         BlockPos pos,
-        @Nullable Holder<Biome> biome,
         Operation<WeightedList<MobSpawnSettings.SpawnerData>> original
     ) {
-        if (NaturalSpawner.isInNetherFortressBounds(pos, level, mobCategory, structureManager)) {
-            var monsterSpawns = structureManager.registryAccess().lookupOrThrow(Registries.STRUCTURE).getValueOrThrow(BuiltinStructures.FORTRESS).spawnOverrides().get(MobCategory.MONSTER);
-            if (monsterSpawns != null) {
-                return EventHooks.getPotentialSpawns(level, mobCategory, pos, monsterSpawns.spawns());
-            }
-        }
-        return EventHooks.getPotentialSpawns(level, mobCategory, pos, generator.getMobsAt(biome != null ? biome : level.getBiome(pos), structureManager, mobCategory, pos));
+        return EventHooks.getPotentialSpawns(level, mobCategory, pos,
+            original.call(level, structureManager, generator, mobCategory, pos));
     }
 }

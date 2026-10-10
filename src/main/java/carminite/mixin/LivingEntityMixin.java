@@ -214,7 +214,7 @@ public abstract class LivingEntityMixin {
 	}
 
 	@Inject(
-		method = "randomTeleport(DDDZ)Z",
+		method = "checkPositionAndTeleport(DDDZLjava/util/function/Predicate;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;)Z",
 		at = @At(
 			value = "INVOKE",
 			target = "Lnet/minecraft/world/entity/LivingEntity;teleportTo(DDD)V"
@@ -222,10 +222,6 @@ public abstract class LivingEntityMixin {
 		cancellable = true
 	)
 	private void carminite$entityTeleport(
-		double xx,
-		double yy,
-		double zz,
-		boolean showParticles,
 		CallbackInfoReturnable<Boolean> cir
 	) {
 		CarminiteEntityTeleportEvent event = CarminiteHooks.onEntityTeleport((LivingEntity) (Object) this);

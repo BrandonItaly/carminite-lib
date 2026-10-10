@@ -1,81 +1,66 @@
 package carminite.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.QuadInstance;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.OutlineBufferSource;
-import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.renderer.SubmitNodeCollection;
-import net.minecraft.client.renderer.SubmitNodeStorage;
+import net.minecraft.client.renderer.OrderedSubmitNodeCollector;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
-import net.minecraft.client.renderer.feature.BlockFeatureRenderer;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
-import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.Direction;
-import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.Nullable;
 
-@ApiStatus.Internal
-public final class ExtendedBlockFeatureRenderer extends BlockFeatureRenderer {
-    private static final Direction[] DIRECTIONS = Direction.values();
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
-    public static void renderMultiLayerBlockModelSubmits(
-        SubmitNodeCollection nodeCollection,
-        MultiBufferSource.BufferSource bufferSource,
-        OutlineBufferSource outlineBufferSource,
-        QuadInstance quadInstance,
-        boolean translucent) {
-        for (SubmitNodeStorage.MultiLayerBlockModelSubmit submit : nodeCollection.carminite$getMultiLayerBlockModelSubmits()) {
-            if (submit.translucent() != translucent) {
-                continue;
+public final class ExtendedBlockFeatureRenderer {
+    // Submit each material separately so vanilla handles transparency and outlines
+    public static void submit(OrderedSubmitNodeCollector collector, PoseStack poseStack,
+                              List<BlockStateModelPart> parts, int[] tints,
+                              int light, int overlay, int outline) {
+        for (BlockStateModelPart part : parts) {
+            Map<RenderType, Map<@Nullable Direction, List<BakedQuad>>> layers = new LinkedHashMap<>();
+            for (Direction direction : Direction.values()) {
+                collect(layers, direction, part.getQuads(direction));
             }
-
-            int outlineColor = submit.outlineColor();
-            VertexConsumer outlineBuffer = null;
-            if (outlineColor != 0) {
-                outlineBufferSource.setColor(outlineColor);
-                outlineBuffer = outlineBufferSource.getBuffer(RenderTypes.outline(TextureAtlas.LOCATION_BLOCKS));
-            }
-
-            quadInstance.setLightCoords(submit.lightCoords());
-            quadInstance.setOverlayCoords(submit.overlayCoords());
-
-            PoseStack.Pose pose = submit.pose();
-            int[] tintLayers = submit.tintLayers();
-            for (BlockStateModelPart part : submit.modelParts()) {
-                putMultiLayerPartQuads(pose, part, quadInstance, tintLayers, bufferSource, outlineBuffer);
-            }
+            collect(layers, null, part.getQuads(null));
+            layers.forEach((type, quads) -> collector.submitBlockModel(poseStack, type,
+                List.of(new LayerPart(part, quads)), tints, light, overlay, outline));
         }
     }
 
-    private static void putMultiLayerPartQuads(
-        PoseStack.Pose pose,
-        BlockStateModelPart part,
-        QuadInstance quadInstance,
-        int[] tintLayers,
-        MultiBufferSource.BufferSource bufferSource,
-        @Nullable VertexConsumer outlineBuffer) {
-        for (Direction direction : DIRECTIONS) {
-            for (BakedQuad quad : part.getQuads(direction)) {
-                putQuad(pose, quad, quadInstance, tintLayers, getQuadBuffer(bufferSource, quad), outlineBuffer);
-            }
-        }
-
-        for (BakedQuad quad : part.getQuads(null)) {
-            putQuad(pose, quad, quadInstance, tintLayers, getQuadBuffer(bufferSource, quad), outlineBuffer);
+    private static void collect(Map<RenderType, Map<@Nullable Direction, List<BakedQuad>>> layers,
+                                @Nullable Direction direction, List<BakedQuad> quads) {
+        for (BakedQuad quad : quads) {
+            layers.computeIfAbsent(quad.materialInfo().itemRenderType(), _ -> new HashMap<>())
+                .computeIfAbsent(direction, _ -> new ArrayList<>()).add(quad);
         }
     }
 
-    private static VertexConsumer getQuadBuffer(MultiBufferSource.BufferSource bufferSource, BakedQuad quad) {
-        return bufferSource.getBuffer(switch (quad.materialInfo().layer()) {
-            case SOLID -> RenderTypes.entitySolid(TextureAtlas.LOCATION_BLOCKS);
-            case CUTOUT -> Sheets.cutoutBlockSheet();
-            case TRANSLUCENT -> Sheets.translucentBlockSheet();
-        });
+    private record LayerPart(BlockStateModelPart original,
+                             Map<@Nullable Direction, List<BakedQuad>> quads) implements BlockStateModelPart {
+        @Override
+        public List<BakedQuad> getQuads(@Nullable Direction direction) {
+            return quads.getOrDefault(direction, List.of());
+        }
+
+        @Override
+        public boolean useAmbientOcclusion() {
+            return original.useAmbientOcclusion();
+        }
+
+        @Override
+        public Material.Baked particleMaterial() {
+            return original.particleMaterial();
+        }
+
+        @Override
+        public int materialFlags() {
+            return original.materialFlags();
+        }
     }
 
     private ExtendedBlockFeatureRenderer() {}
 }
-

@@ -6,7 +6,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.ItemInHandRenderer;
+import net.minecraft.client.player.FirstPersonHandsAndItems;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.Level;
@@ -16,26 +16,26 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(ItemInHandRenderer.class)
+@Mixin(FirstPersonHandsAndItems.class)
 public class ItemInHandRendererMixin {
 
 	@WrapOperation(
-		method = "tick()V",
+		method = "tick(Lnet/minecraft/client/player/LocalPlayer;)V",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/client/renderer/ItemInHandRenderer;shouldInstantlyReplaceVisibleItem(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)Z",
+			target = "Lnet/minecraft/client/player/FirstPersonHandsAndItems;shouldInstantlyReplaceVisibleItem(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/client/player/LocalPlayer;)Z",
 			ordinal = 0
 		)
 	)
 	private boolean carminite$shouldCauseReequipAnimationFirst(
-		ItemInHandRenderer instance,
+		FirstPersonHandsAndItems instance,
 		ItemStack currentlyVisibleItem,
 		ItemStack expectedItem,
-		Operation<Boolean> original,
-		@Local(name = "player") LocalPlayer player
+		LocalPlayer player,
+		Operation<Boolean> original
 	) {
 		if (!(currentlyVisibleItem.getItem() instanceof IContinuousUseItem)) {
-			return original.call(instance, currentlyVisibleItem, expectedItem);
+			return original.call(instance, currentlyVisibleItem, expectedItem, player);
 		}
 		return !ClientHooks.shouldCauseReequipAnimation(
 			currentlyVisibleItem,
@@ -45,21 +45,22 @@ public class ItemInHandRendererMixin {
 	}
 
 	@WrapOperation(
-		method = "tick()V",
+		method = "tick(Lnet/minecraft/client/player/LocalPlayer;)V",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/client/renderer/ItemInHandRenderer;shouldInstantlyReplaceVisibleItem(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)Z",
+			target = "Lnet/minecraft/client/player/FirstPersonHandsAndItems;shouldInstantlyReplaceVisibleItem(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/client/player/LocalPlayer;)Z",
 			ordinal = 1
 		)
 	)
 	private boolean carminite$shouldCauseReequipAnimationSecond(
-		ItemInHandRenderer instance,
+		FirstPersonHandsAndItems instance,
 		ItemStack currentlyVisibleItem,
 		ItemStack expectedItem,
+		LocalPlayer player,
 		Operation<Boolean> original
 	) {
 		if (!(currentlyVisibleItem.getItem() instanceof IContinuousUseItem)) {
-			return original.call(instance, currentlyVisibleItem, expectedItem);
+			return original.call(instance, currentlyVisibleItem, expectedItem, player);
 		}
 		return !ClientHooks.shouldCauseReequipAnimation(
 			currentlyVisibleItem,
@@ -69,7 +70,7 @@ public class ItemInHandRendererMixin {
 	}
 
 	@Redirect(
-		method = "renderMap(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/world/item/ItemStack;)V",
+		method = "extractMapRenderState(Lnet/minecraft/client/player/LocalPlayer;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/client/renderer/state/MapRenderState;)Z",
 		at = @At(
 			value = "INVOKE",
 			target = "Lnet/minecraft/world/item/MapItem;getSavedData(Lnet/minecraft/world/level/saveddata/maps/MapId;Lnet/minecraft/world/level/Level;)Lnet/minecraft/world/level/saveddata/maps/MapItemSavedData;"

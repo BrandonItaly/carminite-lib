@@ -29,7 +29,7 @@ public abstract class InputEvent extends CarminiteEvent {
         }
 
         public int getScanCode() {
-            return this.keyEvent.scancode();
+            return this.keyEvent.keycode();
         }
 
         public int getAction() {
