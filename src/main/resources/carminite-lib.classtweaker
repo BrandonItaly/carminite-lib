@@ -18,10 +18,6 @@ transitive-inject-interface net/minecraft/world/item/Item carminite/interfaces/e
 transitive-inject-interface net/minecraft/world/item/ItemStack carminite/interfaces/extensions/IItemStackExtension
 transitive-inject-interface net/minecraft/world/entity/Entity carminite/interfaces/extensions/IEntityExtension
 transitive-inject-interface net/minecraft/world/level/block/BucketPickup carminite/interfaces/extensions/IBucketPickupExtension
-transitive-inject-interface net/minecraft/client/renderer/OrderedSubmitNodeCollector carminite/interfaces/extensions/IOrderedSubmitNodeCollectorExtension
-transitive-inject-interface net/minecraft/client/renderer/SubmitNodeStorage carminite/interfaces/extensions/ISubmitNodeStorageExtension
-transitive-inject-interface net/minecraft/client/renderer/SubmitNodeCollection carminite/interfaces/extensions/ISubmitNodeCollectionExtension
-transitive-inject-interface net/minecraft/client/renderer/block/BlockModelRenderState carminite/interfaces/extensions/IBlockModelRenderStateExtension
 transitive-inject-interface net/minecraft/client/data/models/EquipmentAssetProvider carminite/interfaces/extensions/IEquipmentAssetProviderExtension
 transitive-inject-interface net/minecraft/world/item/component/ItemContainerContents carminite/interfaces/extensions/IItemContainerContentsExtension
 transitive-inject-interface net/minecraft/util/random/WeightedList$Builder carminite/interfaces/extensions/IWeightedListExtension$BuilderExtension

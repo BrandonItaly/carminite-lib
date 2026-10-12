@@ -73,7 +73,6 @@
     "AbstractClientPlayerMixin",
     "AvatarRendererMixin",
     "BlockEntityRenderDispatcherMixin",
-    "BlockModelRenderStateMixin",
     "BossHealthOverlayMixin",
     "CameraMixin",
     "ClientLevelMixin",
@@ -91,8 +90,7 @@
     "ModelLocationUtilsMixin",
     "ModelTemplatesMixin",
     "MouseHandlerMixin",
-    "MultiPlayerGameModeMixin",
-    "SubmitNodeCollectionMixin"
+    "MultiPlayerGameModeMixin"
   ],
   "injectors": {
     "defaultRequire": 1
