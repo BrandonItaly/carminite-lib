@@ -12,8 +12,3 @@ Parts of this library may be derived from previous works by [NeoForge](https://g
 ## Purpose
 
 This library contains some useful NeoForge compatibility shims and is published for use by the Twilight Forest on Fabric. The goal is that this library will become smaller over time, until it is eventually archived, as we are able to transition to more native Fabric implementations.
-
-## Slated for Removal by 26.3
-
-- IHolderLookupProviderExtension
-- ILevelReaderExtension
