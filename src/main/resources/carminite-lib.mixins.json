@@ -84,6 +84,7 @@
     "KeyboardHandlerMixin",
     "LevelRendererMixin",
     "LocalPlayerMixin",
+    "MapRendererMixin",
     "MinecraftMixin",
     "ModelLocationUtilsMixin",
     "ModelTemplatesMixin",
