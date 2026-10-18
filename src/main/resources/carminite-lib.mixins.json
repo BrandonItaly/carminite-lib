@@ -37,7 +37,6 @@
     "MobMixin",
     "NaturalSpawnerMixin",
     "PersistentEntitySectionManagerMixin",
-    "PhantomSpawnerMixin",
     "PistonBaseBlockMixin",
     "PistonStructureResolverMixin",
     "PlayerAdvancementsMixin",
