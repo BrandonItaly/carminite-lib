@@ -18,7 +18,6 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import net.minecraft.util.random.Weighted;
 import net.minecraft.util.random.WeightedList;
 
-
 /**
  * Borrowed from Kilt, thanks BluSpring!
  */
@@ -32,7 +31,7 @@ public abstract class WeightedListMixin {
         @Final
         private ImmutableList.Builder<Weighted<E>> result;
 
-        @Unique private final List<Weighted<E>> carminite$$removed = new ArrayList<>();
+        @Unique private final List<Weighted<E>> carminite$removed = new ArrayList<>();
 
         @Override
         @SuppressWarnings("unchecked")
@@ -61,7 +60,7 @@ public abstract class WeightedListMixin {
 
         @Override
         public WeightedList.Builder<E> carminite$remove(Weighted<E> value) {
-            this.carminite$$removed.add(value);
+            this.carminite$removed.add(value);
             return (WeightedList.Builder<E>) (Object) this;
         }
 
@@ -69,10 +68,9 @@ public abstract class WeightedListMixin {
         public WeightedList.Builder<E> carminite$removeIf(Predicate<Weighted<E>> filter) {
             for (Weighted<E> weighted : this.result.build()) {
                 if (filter.test(weighted)) {
-                    this.carminite$$removed.add(weighted);
+                    this.carminite$removed.add(weighted);
                 }
             }
-
             return (WeightedList.Builder<E>) (Object) this;
         }
 
@@ -84,7 +82,7 @@ public abstract class WeightedListMixin {
         @Unique
         private List<Weighted<E>> carminite$withoutRemoved(List<? extends Weighted<E>> original) {
             var list = new ArrayList<>(original);
-            for (Weighted<E> weighted : this.carminite$$removed) {
+            for (Weighted<E> weighted : this.carminite$removed) {
                 list.remove(weighted);
             }
 
