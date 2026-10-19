@@ -1,15 +1,19 @@
 package carminite;
 
-import carminite.multipart.IMultiPartEntity;
-import carminite.multipart.PartEntity;
+import carminite.entity.AdvancedAddEntityPayload;
+import carminite.entity.IMultiPartEntity;
+import carminite.entity.PartEntity;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 
 public class CarminiteClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
         registerClientMultipartEvents();
+
+        ClientPlayNetworking.registerGlobalReceiver(AdvancedAddEntityPayload.TYPE, AdvancedAddEntityPayload::handle);
     }
 
     private static void registerClientMultipartEvents() {

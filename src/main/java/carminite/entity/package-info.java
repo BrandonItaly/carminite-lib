@@ -1,4 +1,4 @@
 @NullMarked
-package carminite.multipart;
+package carminite.entity;
 
 import org.jspecify.annotations.NullMarked;

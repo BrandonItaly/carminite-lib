@@ -1,11 +1,13 @@
 package carminite;
 
-import carminite.multipart.IMultiPartEntity;
-import carminite.multipart.PartEntity;
+import carminite.entity.AdvancedAddEntityPayload;
+import carminite.entity.IMultiPartEntity;
+import carminite.entity.PartEntity;
 import carminite.util.ServerLifecycleHooks;
 import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.minecraft.resources.Identifier;
 
 import org.slf4j.Logger;
@@ -23,6 +25,8 @@ public class Carminite implements ModInitializer {
 	public void onInitialize() {
 		ServerLifecycleHooks.init();
 		registerServerMultipartEvents();
+
+		PayloadTypeRegistry.clientboundPlay().register(AdvancedAddEntityPayload.TYPE, AdvancedAddEntityPayload.STREAM_CODEC);
 	}
 
 	private static void registerServerMultipartEvents() {
