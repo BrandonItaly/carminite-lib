@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(targets = "net.minecraft.world.inventory.GrindstoneMenu$4")
-public abstract class GrindstoneMenu$4Mixin {
+public abstract class GrindstoneMenu$4Mixin implements IGrindstoneMenuExtension{
 
     @Final
     @Shadow
@@ -53,8 +53,8 @@ public abstract class GrindstoneMenu$4Mixin {
         Level level,
         CallbackInfoReturnable<Integer> cir
     ) {
-        if (((IGrindstoneMenuExtension)this).carminite$getXp() >= -1) {
-            cir.setReturnValue(((IGrindstoneMenuExtension)this).carminite$getXp());
+        if (this.carminite$getXp() >= -1) {
+            cir.setReturnValue(this.carminite$getXp());
         }
     }
 }
