@@ -9,9 +9,6 @@ accessible field net/minecraft/world/inventory/AnvilMenu repairItemCountCost I
 # GrindstoneMenu$4Mixin
 accessible field net/minecraft/world/inventory/GrindstoneMenu repairSlots Lnet/minecraft/world/Container;
 
-# ExtendedBlockFeatureRenderer
-accessible method net/minecraft/client/renderer/feature/BlockFeatureRenderer putQuad (Lcom/mojang/blaze3d/vertex/PoseStack$Pose;Lnet/minecraft/client/resources/model/geometry/BakedQuad;Lcom/mojang/blaze3d/vertex/QuadInstance;[ILcom/mojang/blaze3d/vertex/VertexConsumer;Lcom/mojang/blaze3d/vertex/VertexConsumer;)V
-
 # Interface Injections
 transitive-inject-interface net/minecraft/core/HolderLookup$Provider carminite/interfaces/extensions/IHolderLookupProviderExtension
 transitive-inject-interface net/minecraft/world/level/Level carminite/interfaces/extensions/ILevelExtension
@@ -26,3 +23,4 @@ transitive-inject-interface net/minecraft/world/level/block/BucketPickup carmini
 transitive-inject-interface net/minecraft/client/data/models/EquipmentAssetProvider carminite/interfaces/extensions/IEquipmentAssetProviderExtension
 transitive-inject-interface net/minecraft/world/item/component/ItemContainerContents carminite/interfaces/extensions/IItemContainerContentsExtension
 transitive-inject-interface net/minecraft/util/random/WeightedList$Builder carminite/interfaces/extensions/IWeightedListExtension$BuilderExtension
+transitive-inject-interface net/minecraft/client/renderer/blockentity/BlockEntityRenderDispatcher carminite/interfaces/extensions/IBlockEntityRenderDispatcherExtension
