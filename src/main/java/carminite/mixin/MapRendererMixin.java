@@ -1,32 +1,27 @@
 package carminite.mixin;
 
 import carminite.client.map.MapRendererManager;
+import com.llamalad7.mixinextras.expression.Definition;
+import com.llamalad7.mixinextras.expression.Expression;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MapRenderer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.MapRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.util.Mth;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.Objects;
 
 @Mixin(MapRenderer.class)
 public abstract class MapRendererMixin {
@@ -35,61 +30,40 @@ public abstract class MapRendererMixin {
     @Final
     private TextureAtlas decorationSprites;
 
-    /**
-     * @author Autumn
-     * @reason The NeoForge patch adds a 'continue' here, which will need to be handled more carefully at some point if we ish to avoid the Overwrite.
-     */
-    @Overwrite
-    public void render(final MapRenderState mapRenderState, final PoseStack poseStack, final SubmitNodeCollector submitNodeCollector, final boolean showOnlyFrame, final int lightCoords) {
-        submitNodeCollector.submitCustomGeometry(poseStack, RenderTypes.text(mapRenderState.texture), (pose, buffer) -> {
-            buffer.addVertex(pose, 0.0F, 128.0F, -0.01F).setColor(-1).setUv(0.0F, 1.0F).setLight(lightCoords);
-            buffer.addVertex(pose, 128.0F, 128.0F, -0.01F).setColor(-1).setUv(1.0F, 1.0F).setLight(lightCoords);
-            buffer.addVertex(pose, 128.0F, 0.0F, -0.01F).setColor(-1).setUv(1.0F, 0.0F).setLight(lightCoords);
-            buffer.addVertex(pose, 0.0F, 0.0F, -0.01F).setColor(-1).setUv(0.0F, 0.0F).setLight(lightCoords);
-        });
-        int count = 0;
+    @Definition(id = "showOnlyFrame", local = @Local(type = boolean.class, argsOnly = true))
+    @Expression("showOnlyFrame")
+    @ModifyExpressionValue(
+        method = "render(Lnet/minecraft/client/renderer/state/MapRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ZI)V",
+        at = @At("MIXINEXTRAS:EXPRESSION")
+    )
+    private boolean carminite$handleShowOnlyFrame(boolean original) {
+        return true;
+    }
 
-        for(MapRenderState.MapDecorationRenderState decoration : mapRenderState.decorations) {
-            if (!showOnlyFrame || decoration.renderOnFrame) {
-                if (MapRendererManager.render(decoration, poseStack, submitNodeCollector, mapRenderState, this.decorationSprites, showOnlyFrame, lightCoords, count)) {
-                    count++;
-                    continue;
-                }
-                poseStack.pushPose();
-                poseStack.translate((float)decoration.x / 2.0F + 64.0F, (float)decoration.y / 2.0F + 64.0F, -0.02F);
-                poseStack.mulPose(Axis.ZP.rotationDegrees((float)(decoration.rot * 360) / 16.0F));
-                poseStack.scale(4.0F, 4.0F, 3.0F);
-                poseStack.translate(-0.125F, 0.125F, 0.0F);
-                TextureAtlasSprite atlasSprite = decoration.atlasSprite;
-                if (atlasSprite != null) {
-                    float z = (float)count * -0.001F;
-                    submitNodeCollector.submitCustomGeometry(poseStack, RenderTypes.text(atlasSprite.atlasLocation()), (pose, buffer) -> {
-                        buffer.addVertex(pose, -1.0F, 1.0F, z).setColor(-1).setUv(atlasSprite.getU0(), atlasSprite.getV0()).setLight(lightCoords);
-                        buffer.addVertex(pose, 1.0F, 1.0F, z).setColor(-1).setUv(atlasSprite.getU1(), atlasSprite.getV0()).setLight(lightCoords);
-                        buffer.addVertex(pose, 1.0F, -1.0F, z).setColor(-1).setUv(atlasSprite.getU1(), atlasSprite.getV1()).setLight(lightCoords);
-                        buffer.addVertex(pose, -1.0F, -1.0F, z).setColor(-1).setUv(atlasSprite.getU0(), atlasSprite.getV1()).setLight(lightCoords);
-                    });
-                    poseStack.popPose();
-                }
-
-                if (decoration.name != null) {
-                    Font font = Minecraft.getInstance().font;
-                    float width = (float)font.width(decoration.name);
-                    float var10000 = 25.0F / width;
-                    Objects.requireNonNull(font);
-                    float scale = Mth.clamp(var10000, 0.0F, 6.0F / 9.0F);
-                    poseStack.pushPose();
-                    poseStack.translate((float)decoration.x / 2.0F + 64.0F - width * scale / 2.0F, (float)decoration.y / 2.0F + 64.0F + 4.0F, -0.025F);
-                    poseStack.scale(scale, scale, -1.0F);
-                    poseStack.translate(0.0F, 0.0F, 0.1F);
-                    submitNodeCollector.order(1).submitText(poseStack, 0.0F, 0.0F, decoration.name.getVisualOrderText(), false, Font.DisplayMode.NORMAL, lightCoords, -1, Integer.MIN_VALUE, 0);
-                    poseStack.popPose();
-                }
-
-                ++count;
-            }
+    @ModifyExpressionValue(
+        method = "render(Lnet/minecraft/client/renderer/state/MapRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ZI)V",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/renderer/state/MapRenderState$MapDecorationRenderState;renderOnFrame:Z",
+            opcode = Opcodes.GETFIELD
+        )
+    )
+    private boolean carminite$renderMapDecorationType(
+        boolean original,
+        @Local(argsOnly = true, name = "mapRenderState") MapRenderState mapRenderState,
+        @Local(argsOnly = true, name = "poseStack") PoseStack poseStack,
+        @Local(argsOnly = true, name = "submitNodeCollector") SubmitNodeCollector submitNodeCollector,
+        @Local(argsOnly = true, name = "showOnlyFrame") boolean showOnlyFrame,
+        @Local(argsOnly = true, name = "lightCoords") int lightCoords,
+        @Local(name = "count") LocalIntRef count,
+        @Local(name = "decoration") MapRenderState.MapDecorationRenderState decoration
+    ) {
+        boolean shouldRender = !showOnlyFrame || original;
+        if (shouldRender && MapRendererManager.render(decoration, poseStack, submitNodeCollector, mapRenderState, this.decorationSprites, showOnlyFrame, lightCoords, count.get())) {
+            count.set(count.get() + 1);
+            return false;
         }
-
+        return shouldRender;
     }
 
     @Inject(
