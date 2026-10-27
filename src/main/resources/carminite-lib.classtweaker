@@ -21,3 +21,4 @@ transitive-inject-interface net/minecraft/world/level/block/BucketPickup carmini
 transitive-inject-interface net/minecraft/client/data/models/EquipmentAssetProvider carminite/interfaces/extensions/IEquipmentAssetProviderExtension
 transitive-inject-interface net/minecraft/world/item/component/ItemContainerContents carminite/interfaces/extensions/IItemContainerContentsExtension
 transitive-inject-interface net/minecraft/util/random/WeightedList$Builder carminite/interfaces/extensions/IWeightedListExtension$BuilderExtension
+transitive-inject-interface net/minecraft/client/renderer/blockentity/BlockEntityRenderDispatcher carminite/interfaces/extensions/IBlockEntityRenderDispatcherExtension

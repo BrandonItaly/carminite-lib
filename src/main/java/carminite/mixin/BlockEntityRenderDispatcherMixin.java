@@ -1,42 +1,37 @@
 package carminite.mixin;
 
 import carminite.interfaces.markers.IExtendedBoundingBoxBlockEntityRenderer;
-import carminite.util.LevelRendererFrustumHolder;
-import com.llamalad7.mixinextras.sugar.Local;
+import carminite.interfaces.extensions.IBlockEntityRenderDispatcherExtension;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(BlockEntityRenderDispatcher.class)
-public class BlockEntityRenderDispatcherMixin {
+public abstract class BlockEntityRenderDispatcherMixin implements IBlockEntityRenderDispatcherExtension {
+    @Shadow
+    public abstract @Nullable <E extends BlockEntity, S extends BlockEntityRenderState> BlockEntityRenderer<E, S> getRenderer(E blockEntity);
 
-	@Inject(
-		method = "tryExtractRenderState(Lnet/minecraft/world/level/block/entity/BlockEntity;FLnet/minecraft/client/renderer/feature/ModelFeatureRenderer$CrumblingOverlay;Z)Lnet/minecraft/client/renderer/blockentity/state/BlockEntityRenderState;",
-		at = @At(
-			value = "INVOKE",
-			target = "Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;shouldRender(Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/world/phys/Vec3;)Z",
-			shift = At.Shift.BEFORE
-		),
-		cancellable = true
-	)
-	private <E extends BlockEntity, S extends BlockEntityRenderState> void carminite$checkExtendedBounds(
-		BlockEntity blockEntity,
-		float partialTicks,
-		ModelFeatureRenderer.CrumblingOverlay breakProgress,
-		boolean isGloballyRendered,
-		CallbackInfoReturnable<BlockEntityRenderState> cir,
-		@Local(name = "renderer") BlockEntityRenderer<E, S> renderer
-	) {
-		Frustum frustum = LevelRendererFrustumHolder.getFrustum();
-		if (frustum != null && renderer instanceof IExtendedBoundingBoxBlockEntityRenderer extended && !frustum.isVisible(extended.getRenderBoundingBox(blockEntity))) {
-			cir.setReturnValue(null);
-		}
-	}
+    @Shadow
+    public abstract <E extends BlockEntity, S extends BlockEntityRenderState> @Nullable S tryExtractRenderState(E blockEntity, float partialTicks, ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress, boolean isGloballyRendered);
+
+    @Override
+    public <E extends BlockEntity, S extends BlockEntityRenderState> @Nullable S carminite$tryExtractRenderState(E blockEntity, float partialTicks, ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress, @Nullable Frustum frustum) {
+        BlockEntityRenderer<E, S> renderer = this.getRenderer(blockEntity);
+        return renderer == null ? null : this.carminite$tryExtractRenderState(blockEntity, partialTicks, breakProgress, renderer.shouldRenderOffScreen(), frustum);
+    }
+
+    @Override
+    public <E extends BlockEntity, S extends BlockEntityRenderState> @Nullable S carminite$tryExtractRenderState(E blockEntity, float partialTicks, ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress, boolean isGloballyRendered, @Nullable Frustum frustum) {
+        BlockEntityRenderer<E, S> renderer = this.getRenderer(blockEntity);
+        if (frustum != null && renderer instanceof IExtendedBoundingBoxBlockEntityRenderer extended && !frustum.isVisible(extended.getRenderBoundingBox(blockEntity))) {
+            return null;
+        }
+        return this.tryExtractRenderState(blockEntity, partialTicks, breakProgress, isGloballyRendered);
+    }
 }

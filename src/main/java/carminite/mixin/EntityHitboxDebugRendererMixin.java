@@ -1,7 +1,7 @@
 package carminite.mixin;
 
-import carminite.multipart.IMultiPartEntity;
-import carminite.multipart.PartEntity;
+import carminite.entity.IMultiPartEntity;
+import carminite.entity.PartEntity;
 import net.minecraft.client.renderer.debug.EntityHitboxDebugRenderer;
 import net.minecraft.gizmos.GizmoStyle;
 import net.minecraft.gizmos.Gizmos;

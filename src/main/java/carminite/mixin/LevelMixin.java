@@ -1,7 +1,7 @@
 package carminite.mixin;
 
 import carminite.interfaces.extensions.ILevelExtension;
-import carminite.multipart.PartEntity;
+import carminite.entity.PartEntity;
 import com.llamalad7.mixinextras.sugar.Local;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;

@@ -3,7 +3,7 @@ package carminite.mixin;
 import carminite.events.hooks.EventHooks;
 import carminite.events.neoforge.EntityJoinLevelEvent;
 import carminite.interfaces.extensions.ILevelExtension;
-import carminite.multipart.PartEntity;
+import carminite.entity.PartEntity;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;

@@ -1,4 +1,4 @@
-package carminite.multipart;
+package carminite.entity;
 
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
