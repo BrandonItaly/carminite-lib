@@ -12,7 +12,10 @@ public class AbstractClientPlayerMixin {
 
     @ModifyReturnValue(
         method = "getFieldOfViewModifier(ZF)F",
-        at = @At("RETURN")
+        at = @At(
+            value = "RETURN",
+            ordinal = 1
+        )
     )
     private float carminite$computeFovModifier(
         float original,
