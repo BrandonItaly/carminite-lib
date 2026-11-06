@@ -1,9 +1,11 @@
 ![title.png](src/main/resources/assets/carminite-lib/title.png)
 
 ## Licensing
-Code unless otherwise stated defaults to our [LICENSE file here](LICENSE).
+Everything not stated below are **All Rights Reserved** by default.
 
-Non-Code assets [(Located here)](src/main/resources/assets) go by our [LICENSE_ASSETS file here](LICENSE_ASSETS).
+Java Code specifically under this listed directory follow this [LICENSE file here](LICENSE):
+
+- [src/main/java](src/main/java)
 
 ## Attribution
 
