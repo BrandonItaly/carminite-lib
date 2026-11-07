@@ -50,6 +50,7 @@ public abstract class LevelEvent extends CarminiteEvent {
             return view;
         }
 
+        @SuppressWarnings("all")
         private void makeList() {
             if (list == null) {
                 list = WeightedList.builder();
@@ -58,14 +59,18 @@ public abstract class LevelEvent extends CarminiteEvent {
             }
         }
 
+        @SuppressWarnings("all")
         public void addSpawnerData(Weighted<MobSpawnSettings.SpawnerData> data) {
             makeList();
             list.carminite$add(data);
+            view = list.carminite$getList();
         }
 
+        @SuppressWarnings("all")
         public void removeSpawnerData(Weighted<MobSpawnSettings.SpawnerData> data) {
             makeList();
             list.carminite$remove(data);
+            view = list.carminite$getList();
         }
 
         @Override

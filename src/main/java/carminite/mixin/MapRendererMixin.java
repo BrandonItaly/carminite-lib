@@ -1,10 +1,10 @@
 package carminite.mixin;
 
 import carminite.client.map.MapRendererManager;
-import com.llamalad7.mixinextras.expression.Definition;
-import com.llamalad7.mixinextras.expression.Expression;
+import carminite.util.mixin.ElementSkippingList;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MapRenderer;
@@ -23,6 +23,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.List;
+
 @Mixin(MapRenderer.class)
 public abstract class MapRendererMixin {
 
@@ -30,40 +32,46 @@ public abstract class MapRendererMixin {
     @Final
     private TextureAtlas decorationSprites;
 
-    @Definition(id = "showOnlyFrame", local = @Local(type = boolean.class, argsOnly = true))
-    @Expression("showOnlyFrame")
     @ModifyExpressionValue(
         method = "render(Lnet/minecraft/client/renderer/state/MapRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ZI)V",
-        at = @At("MIXINEXTRAS:EXPRESSION")
-    )
-    private boolean carminite$handleShowOnlyFrame(boolean original) {
-        return true;
-    }
-
-    @ModifyExpressionValue(
-        method = "render(Lnet/minecraft/client/renderer/state/MapRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ZI)V",
-        at = @At(
-            value = "FIELD",
-            target = "Lnet/minecraft/client/renderer/state/MapRenderState$MapDecorationRenderState;renderOnFrame:Z",
+        at = @At(value = "FIELD",
+            target = "Lnet/minecraft/client/renderer/state/MapRenderState;decorations:Ljava/util/List;",
             opcode = Opcodes.GETFIELD
         )
     )
-    private boolean carminite$renderMapDecorationType(
-        boolean original,
+    private List<MapRenderState.MapDecorationRenderState> carminite$wrapDecorationList(
+        List<MapRenderState.MapDecorationRenderState> original,
         @Local(argsOnly = true, name = "mapRenderState") MapRenderState mapRenderState,
         @Local(argsOnly = true, name = "poseStack") PoseStack poseStack,
-        @Local(argsOnly = true, name = "submitNodeCollector") SubmitNodeCollector submitNodeCollector,
+        @Local(argsOnly = true, name = "submitNodeCollector") SubmitNodeCollector collector,
         @Local(argsOnly = true, name = "showOnlyFrame") boolean showOnlyFrame,
         @Local(argsOnly = true, name = "lightCoords") int lightCoords,
-        @Local(name = "count") LocalIntRef count,
-        @Local(name = "decoration") MapRenderState.MapDecorationRenderState decoration
+        @Share(namespace = "carminite", value = "drawnCount") LocalIntRef drawnCount
     ) {
-        boolean shouldRender = !showOnlyFrame || original;
-        if (shouldRender && MapRendererManager.render(decoration, poseStack, submitNodeCollector, mapRenderState, this.decorationSprites, showOnlyFrame, lightCoords, count.get())) {
-            count.set(count.get() + 1);
+        return new ElementSkippingList<>(original, decoration -> {
+            if ((!showOnlyFrame || decoration.renderOnFrame) && MapRendererManager.render(decoration, poseStack, collector, mapRenderState, this.decorationSprites, showOnlyFrame, lightCoords, drawnCount.get())) {
+                drawnCount.set(drawnCount.get() + 1);
+                return true;
+            }
             return false;
-        }
-        return shouldRender;
+        });
+    }
+
+    @Inject(
+        method = "render(Lnet/minecraft/client/renderer/state/MapRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ZI)V",
+        at = @At(
+            value = "INVOKE",
+            target = "Lcom/mojang/blaze3d/vertex/PoseStack;pushPose()V",
+            ordinal = 0
+        )
+    )
+    private void carminite$wrapCount(
+        CallbackInfo ci,
+        @Local(name = "count") LocalIntRef count,
+        @Share(namespace = "carminite", value = "drawnCount") LocalIntRef drawnCount
+    ) {
+        count.set(drawnCount.get());
+        drawnCount.set(drawnCount.get() + 1);
     }
 
     @Inject(
